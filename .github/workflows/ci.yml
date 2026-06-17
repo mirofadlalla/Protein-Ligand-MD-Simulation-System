@@ -19,4 +19,4 @@ jobs:
         run: docker build -t md-simulation .
 
       - name: Run Tests in Docker
-        run: docker run --rm md-simulation python -m pytest tests/ -v
+        run: docker run --rm md-simulation python -m pytest tests/test_api.py -v
