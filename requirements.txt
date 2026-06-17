@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# requirements.txt
+#
+# Pip-only packages — only used if you prefer a venv over conda.
+# For full compatibility (especially AmberTools/pytraj), use environment.yml
+# and conda instead. See README.md for instructions.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Web framework
+flask>=3.0,<4.0
+flask-cors>=4.0,<5.0
+
+# Cheminformatics
+rdkit>=2024.3.1
+
+# Protein-ligand interactions
+prolif>=2.0.0,<3.0.0
+
+# Trajectory analysis
+MDAnalysis>=2.8.0,<3.0.0
+
+# PDB parsing
+biopandas>=0.4.1,<0.5.0
+
+# Scientific stack (conda versions preferred, pip as fallback)
+numpy>=1.26,<2.0
+scipy>=1.12,<2.0
+pandas>=2.2,<3.0
+matplotlib>=3.8,<4.0
+seaborn>=0.13,<1.0
+
+# NOTE: The following must be installed via conda, NOT pip:
+#   openmm, ambertools, pytraj, pdbfixer, openbabel, parmed, mdtraj

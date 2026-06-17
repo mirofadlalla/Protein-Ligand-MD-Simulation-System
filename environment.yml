@@ -1,0 +1,56 @@
+name: md_env
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  # ── Python ───────────────────────────────────────────────────────────────
+  - python=3.10.*
+
+  # ── MD simulation engine ─────────────────────────────────────────────────
+  - openmm=8.1.*
+
+  # ── AmberTools (includes antechamber, parmchk2, tleap, cpptraj, pdb4amber)
+  - ambertools=22.*
+
+  # ── pytraj — Python interface to cpptraj (must match AmberTools version)
+  - pytraj=2.0.*
+
+  # ── PDB preparation ──────────────────────────────────────────────────────
+  - pdbfixer=1.9.*
+
+  # ── Molecular format conversion ───────────────────────────────────────────
+  - openbabel=3.1.*
+
+  # ── Topology & parameter handling ────────────────────────────────────────
+  - parmed=4.1.*
+
+  # ── Trajectory analysis ───────────────────────────────────────────────────
+  - mdtraj=1.9.*
+
+  # ── Scientific stack ─────────────────────────────────────────────────────
+  - numpy=1.26.*
+  - scipy=1.12.*
+  - pandas=2.2.*
+  - matplotlib=3.8.*
+  - seaborn=0.13.*
+
+  # ── Pip-installable packages ──────────────────────────────────────────────
+  - pip
+  - pip:
+      # Flask API
+      - flask==3.0.*
+      - flask-cors==4.0.*
+
+      # Cheminformatics
+      - rdkit==2024.3.*
+
+      # Ligand-protein interaction fingerprints
+      - prolif==2.0.*
+
+      # Trajectory analysis (MDAnalysis)
+      - MDAnalysis==2.8.*
+
+      # PDB parsing (standard release, compatible with PandasPdb)
+      - biopandas==0.4.*
