@@ -36,6 +36,9 @@ dependencies:
   - matplotlib>=3.7
   - seaborn>=0.12
 
+  # ── RDKit (conda-forge)
+  - rdkit>=2024.3
+
   # ── Pip-installable packages ────────────────────────────────────────
   - pip
   - pip:
@@ -43,14 +46,7 @@ dependencies:
       - flask>=3.0
       - flask-cors>=4.0
 
-      # Cheminformatics
-      - rdkit>=2024.3
-
-      # Ligand-protein interaction fingerprints
+      # Cheminformatics (leave prolif/MDAnalysis/biopandas in pip if you prefer pip installs)
       - prolif>=2.0
-
-      # Trajectory analysis (MDAnalysis)
       - MDAnalysis>=2.8
-
-      # PDB parsing
       - biopandas>=0.4
