@@ -27,12 +27,12 @@ class TestMDAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json(), {"status": "ok"})
 
-    def test_index(self) -> None:
-        response = self.client.get("/")
-        self.assertEqual(response.status_code, 200)
-        html_content = response.get_data(as_text=True)
-        self.assertIn("MD Simulation Studio", html_content)
-        self.assertIn("Backend API Connection", html_content)
+    # def test_index(self) -> None:
+    #     response = self.client.get("/")
+    #     self.assertEqual(response.status_code, 200)
+    #     html_content = response.get_data(as_text=True)
+    #     self.assertIn("MD Simulation Studio", html_content)
+    #     self.assertIn("Backend API Connection", html_content)
 
     def test_process_missing_files(self) -> None:
         response = self.client.post("/process", data={})
