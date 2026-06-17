@@ -15,25 +15,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Cache Conda packages
-        uses: actions/cache@v4
-        with:
-          path: ~/conda_pkgs_dir
-          key: ${{ runner.os }}-conda-${{ hashFiles('environment.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-conda-
+      - name: Build Docker Image
+        run: docker build -t md-simulation .
 
-      - name: Set up Conda Environment
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          channels: conda-forge,defaults
-          environment-file: environment.yml
-          activate-environment: md_env
-          auto-activate-base: false
-          conda-solver: libmamba
-          use-only-tar-bz2: false
-
-      - name: Run Tests
-        shell: bash -el {0}
-        run: |
-          python -m unittest discover -s tests -p "test_*.py"
+      - name: Run Tests in Docker
+        run: docker run --rm md-simulation python -m unittest discover -s tests -p "test_*.py"

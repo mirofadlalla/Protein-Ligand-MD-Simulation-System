@@ -6,47 +6,44 @@ channels:
 
 dependencies:
   # ── Python ───────────────────────────────────────────────────────────
-  - python=3.10.*
+  - python=3.10
 
   # ── MD simulation engine ──────────────────────────────────────────────
-  - openmm>=8.0
+  - openmm::openmm
 
   # ── AmberTools (includes antechamber, parmchk2, tleap, cpptraj, pdb4amber)
-  - ambertools>=23
+  - ambertools
 
   # ── pytraj — Python interface to cpptraj
-  - pytraj>=2.0
+  - pytraj
 
   # ── PDB preparation ──────────────────────────────────────────────────
-  - pdbfixer>=1.8
+  - pdbfixer
 
   # ── Molecular format conversion ──────────────────────────────────────
-  - openbabel>=3.1
+  - openbabel
 
   # ── Topology & parameter handling ────────────────────────────────────
-  - parmed>=4.0
+  - parmed
 
   # ── Trajectory analysis ──────────────────────────────────────────────
-  - mdtraj>=1.9
+  - mdtraj
 
   # ── Scientific stack ─────────────────────────────────────────────────
-  - numpy>=1.23,<2.0
-  - scipy>=1.10
-  - pandas>=2.0
-  - matplotlib>=3.7
-  - seaborn>=0.12
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - seaborn
 
   # ── RDKit (conda-forge)
-  - rdkit>=2024.3
+  - rdkit
 
   # ── Pip-installable packages ────────────────────────────────────────
   - pip
   - pip:
-      # Flask API
       - flask>=3.0
       - flask-cors>=4.0
-
-      # Cheminformatics (leave prolif/MDAnalysis/biopandas in pip if you prefer pip installs)
       - prolif>=2.0
       - MDAnalysis>=2.8
       - biopandas>=0.4
