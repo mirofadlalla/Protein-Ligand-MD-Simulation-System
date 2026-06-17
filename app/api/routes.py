@@ -14,7 +14,7 @@ GET  /health            Liveness probe
 import logging
 import os
 
-from flask import Blueprint, jsonify, make_response, request, send_file, render_template
+from flask import Blueprint, app, jsonify, make_response, request, send_file, render_template
 
 from app.api.schemas import AnalysisRequest, SimulationRequest
 from app.pipeline.orchestrator import run_full_pipeline
@@ -30,10 +30,13 @@ bp = Blueprint("api", __name__)
 # Root route & Dashboard
 # ─────────────────────────────────────────────────────────────────────────────
 
-@bp.route("/", methods=["GET"])
-def index():
-    return render_template("index.html")
+# @bp.route("/", methods=["GET"])
+# def index():
+#     return render_template("index.html")
 
+@bp.route("/")
+def index():
+    return {"status": "ok"}, 200
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Middleware helpers
