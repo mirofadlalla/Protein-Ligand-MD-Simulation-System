@@ -9,13 +9,18 @@ dependencies:
   - python=3.10
 
   # ── MD simulation engine ──────────────────────────────────────────────
-  - openmm::openmm
+  # NOTE: OpenMM is published on conda-forge as a plain package. The old
+  # "openmm::openmm" channel-pinned form forces conda to search a channel
+  # literally named "openmm", which is not listed under `channels:` above —
+  # that mismatch is what produced PackagesNotFoundError.
+  - openmm
 
   # ── AmberTools (includes antechamber, parmchk2, tleap, cpptraj, pdb4amber)
+  # pytraj ships bundled INSIDE the ambertools conda-forge package — it has
+  # never been published as a standalone conda-forge package, so listing it
+  # as a separate dependency (as before) always fails to resolve. Installing
+  # ambertools alone is sufficient; `import pytraj` works once it's installed.
   - ambertools
-
-  # ── pytraj — Python interface to cpptraj
-  - pytraj
 
   # ── PDB preparation ──────────────────────────────────────────────────
   - pdbfixer
@@ -30,7 +35,9 @@ dependencies:
   - mdtraj
 
   # ── Scientific stack ─────────────────────────────────────────────────
-  - numpy
+  # numpy pinned <2.0: ambertools/pytraj builds have known ABI issues with
+  # numpy 2.x (mirrors the existing pin in requirements.txt).
+  - numpy<2.0
   - scipy
   - pandas
   - matplotlib
