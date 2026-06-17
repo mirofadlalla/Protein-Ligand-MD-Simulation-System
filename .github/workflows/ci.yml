@@ -19,4 +19,4 @@ jobs:
         run: docker build -t md-simulation .
 
       - name: Run Tests in Docker
-        run: docker run --rm md-simulation python -m unittest discover -s tests -p "test_*.py"
+        run: docker run --rm md-simulation python -m pytest tests/ -v

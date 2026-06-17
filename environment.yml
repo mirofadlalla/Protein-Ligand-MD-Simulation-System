@@ -46,6 +46,9 @@ dependencies:
   # ── RDKit (conda-forge)
   - rdkit
 
+  # ── Testing ──────────────────────────────────────────────────────────
+  - pytest
+
   # ── Pip-installable packages ────────────────────────────────────────
   - pip
   - pip:
