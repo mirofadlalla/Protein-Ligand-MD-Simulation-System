@@ -74,3 +74,20 @@ CPPTRAJ_BIN:     str = _find_bin("cpptraj",     "CPPTRAJ_BIN")
 # ─── OpenMM Platform ──────────────────────────────────────────────────────────
 # AUTO → try CUDA first, then OpenCL, then CPU
 OPENMM_PLATFORM: str = os.environ.get("OPENMM_PLATFORM", "AUTO")
+
+# ─── Redis & Celery ───────────────────────────────────────────────────────────
+REDIS_HOST: str = os.environ.get("REDIS_HOST", "localhost")
+REDIS_PORT: int = int(os.environ.get("REDIS_PORT", 6379))
+REDIS_DB: int = int(os.environ.get("REDIS_DB", 0))
+REDIS_PASSWORD: str = os.environ.get("REDIS_PASSWORD", "")
+
+# Construct standard connection URL
+if REDIS_PASSWORD:
+    REDIS_URL: str = f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+else:
+    REDIS_URL: str = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+
+CELERY_BROKER_URL: str = os.environ.get("CELERY_BROKER_URL", REDIS_URL)
+CELERY_RESULT_BACKEND: str = os.environ.get("CELERY_RESULT_BACKEND", REDIS_URL)
+USE_REDIS: bool = os.environ.get("USE_REDIS", "true").lower() == "true"
+

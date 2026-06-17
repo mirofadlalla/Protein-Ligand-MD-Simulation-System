@@ -54,6 +54,8 @@ dependencies:
   - pip:
       - flask>=3.0
       - flask-cors>=4.0
+      - celery>=5.3
+      - redis>=5.0
       - prolif>=2.0
       - MDAnalysis>=2.8
       - biopandas>=0.4

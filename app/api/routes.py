@@ -17,7 +17,6 @@ import os
 from flask import Blueprint, app, jsonify, make_response, request, send_file, render_template
 
 from app.api.schemas import AnalysisRequest, SimulationRequest
-from app.pipeline.orchestrator import run_full_pipeline
 from app.utils.file_utils import job_path, pack_zip, job_dir
 from app.utils.job_manager import job_manager
 
@@ -93,10 +92,12 @@ def process():
     sim_req.protein_filename = prot_fname
     sim_req.ligand_filename  = lig_fname
 
-    # ── Submit to background executor ─────────────────────────────────────────
-    job_manager.submit(run_full_pipeline, job_id, sim_req)
+    # ── Submit to Celery task queue ───────────────────────────────────────────
+    from dataclasses import asdict
+    from app.tasks import run_full_pipeline_task
+    run_full_pipeline_task.delay(job_id, asdict(sim_req))
 
-    logger.info("Job %s queued.", job_id)
+    logger.info("Job %s queued in Celery.", job_id)
     return jsonify({"job_id": job_id, "status": "Queued"}), 202
 
 
@@ -135,7 +136,7 @@ def download_results(job_id: str):
     zip_path = job_path(job_id, "Results.zip")
     if not os.path.exists(zip_path):
         return jsonify({"error": "Results not ready or job not found."}), 404
-    return send_file(zip_path, as_attachment=True, download_name=f"{job_id}_Results.zip")
+    return send_file(zip_path, as_attachment=True, download_name=f"{job_id}_Results.zip", mimetype="application/zip")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -202,4 +203,4 @@ def download_analysis(job_id: str):
     zip_path = job_path(job_id, "Analysis.zip")
     if not os.path.exists(zip_path):
         return jsonify({"error": "Analysis results not found."}), 404
-    return send_file(zip_path, as_attachment=True, download_name=f"{job_id}_Analysis.zip")
+    return send_file(zip_path, as_attachment=True, download_name=f"{job_id}_Analysis.zip", mimetype="application/zip")

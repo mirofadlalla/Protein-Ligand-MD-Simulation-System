@@ -1,3 +1,14 @@
+import sys
+from unittest.mock import MagicMock
+
+# Mock scientific dependencies that are not installed on host/Windows
+sys.modules['pytraj'] = MagicMock()
+sys.modules['pytraj.matrix'] = MagicMock()
+sys.modules['openmm'] = MagicMock()
+sys.modules['openmm.app'] = MagicMock()
+sys.modules['openmm.unit'] = MagicMock()
+sys.modules['pdbfixer'] = MagicMock()
+
 import io
 import os
 import shutil
@@ -19,8 +30,7 @@ class TestMDAPI(unittest.TestCase):
 
     def tearDown(self) -> None:
         # Clear the jobs registry between tests
-        with job_manager._lock:
-            job_manager._jobs.clear()
+        job_manager.clear_all()
 
     def test_health(self) -> None:
         response = self.client.get("/health")
@@ -39,8 +49,8 @@ class TestMDAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("Both 'protein' and 'ligand' PDB files are required.", response.get_json()["error"])
 
-    @patch("app.utils.job_manager.JobManager.submit")
-    def test_process_success(self, mock_submit: MagicMock) -> None:
+    @patch("app.tasks.run_full_pipeline_task.delay")
+    def test_process_success(self, mock_delay: MagicMock) -> None:
         data = {
             "protein": (io.BytesIO(b"ATOM      1  N   ALA A   1\n"), "protein.pdb"),
             "ligand": (io.BytesIO(b"ATOM      1  C1  LIG A   1\n"), "ligand.pdb"),
@@ -58,7 +68,7 @@ class TestMDAPI(unittest.TestCase):
         job = job_manager.get_job(job_id)
         self.assertIsNotNone(job)
         self.assertEqual(job["status"], "Queued")
-        mock_submit.assert_called_once()
+        mock_delay.assert_called_once()
 
         # Clean up created job directory
         shutil.rmtree(job_dir(job_id), ignore_errors=True)

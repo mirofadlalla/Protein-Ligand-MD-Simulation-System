@@ -1,13 +1,24 @@
 version: "3.9"
 
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: md-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   md-api:
     build:
       context: .
       dockerfile: Dockerfile
     image: md-simulation:latest
     container_name: md-api
-
     ports:
       - "5005:5005"
 
@@ -24,6 +35,60 @@ services:
       MD_DATA_DIR:     "/app/data"
       OPENMM_PLATFORM: "AUTO"   # AUTO | CUDA | OpenCL | CPU
       LOG_LEVEL:       "INFO"
+      REDIS_HOST:      "redis"
+      REDIS_PORT:      "6379"
+      USE_REDIS:       "true"
+
+    # ── Restart policy ────────────────────────────────────────────────────────
+    restart: unless-stopped
+
+    # ── Dependencies ──────────────────────────────────────────────────────────
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    # ── Health check ──────────────────────────────────────────────────────────
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+    # ── Logging ───────────────────────────────────────────────────────────────
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  md-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: md-simulation:latest
+    container_name: md-worker
+    command: celery -A app.celery_app.celery_app worker --loglevel=INFO -c 1
+
+    # ── Persistent storage ────────────────────────────────────────────────────
+    volumes:
+      - ./data:/app/data
+
+    # ── Environment overrides ─────────────────────────────────────────────────
+    environment:
+      MD_DATA_DIR:     "/app/data"
+      OPENMM_PLATFORM: "AUTO"   # AUTO | CUDA | OpenCL | CPU
+      LOG_LEVEL:       "INFO"
+      REDIS_HOST:      "redis"
+      REDIS_PORT:      "6379"
+      USE_REDIS:       "true"
+
+    # ── Dependencies ──────────────────────────────────────────────────────────
+    depends_on:
+      redis:
+        condition: service_healthy
+      md-api:
+        condition: service_started
 
     # ── Resource limits (tweak to your machine) ───────────────────────────────
     deploy:
@@ -42,21 +107,9 @@ services:
     # ── Restart policy ────────────────────────────────────────────────────────
     restart: unless-stopped
 
-    # ── Health check ──────────────────────────────────────────────────────────
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5005/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 90s
-
     # ── Logging ───────────────────────────────────────────────────────────────
     logging:
       driver: "json-file"
       options:
         max-size: "50m"
         max-file: "3"
-
-# ── Named volumes (optional — swap with bind mount above) ─────────────────────
-# volumes:
-#   md_data:
