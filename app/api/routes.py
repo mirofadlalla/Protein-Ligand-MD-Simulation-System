@@ -14,7 +14,7 @@ GET  /health            Liveness probe
 import logging
 import os
 
-from flask import Blueprint, jsonify, make_response, request, send_file
+from flask import Blueprint, jsonify, make_response, request, send_file, render_template
 
 from app.api.schemas import AnalysisRequest, SimulationRequest
 from app.pipeline.orchestrator import run_full_pipeline
@@ -24,6 +24,15 @@ from app.utils.job_manager import job_manager
 logger = logging.getLogger(__name__)
 
 bp = Blueprint("api", __name__)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Root route & Dashboard
+# ─────────────────────────────────────────────────────────────────────────────
+
+@bp.route("/", methods=["GET"])
+def index():
+    return render_template("index.html")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -141,18 +150,27 @@ def analyze():
     # Lazy import to keep the module fast when analysis isn't needed
     from app.pipeline.analyze import run_standard_analysis
 
-    work    = job_dir(ana_req.job_id)
-    top_path = job_path(ana_req.job_id, f"{ana_req.job_id}_SYS.prmtop")
-    dcd_path = job_path(ana_req.job_id, f"{ana_req.job_id}_prod_1.dcd")
+    job = job_manager.get_job(ana_req.job_id)
+    work = job_dir(ana_req.job_id)
+    if not job or not job.get("result"):
+        return jsonify({"error": "Simulation results not found. Has the job completed?"}), 404
 
-    if not os.path.exists(top_path) or not os.path.exists(dcd_path):
-        return jsonify({"error": "Simulation files not found. Has the job completed?"}), 404
+    result = job["result"]
+    top_path = result.get("top")
+    dcd_paths = result.get("dcd_files")
+
+    if not top_path or not dcd_paths:
+        return jsonify({"error": "Simulation files not found in job results."}), 404
+
+    # Verify that the files exist on the filesystem
+    if not os.path.exists(top_path) or not any(os.path.exists(p) for p in dcd_paths):
+        return jsonify({"error": "Simulation files not found on disk."}), 404
 
     try:
         results = run_standard_analysis(
             job_id=ana_req.job_id,
             top_path=top_path,
-            traj_path=dcd_path,
+            traj_path=dcd_paths,
             work_dir=work,
             skip=ana_req.skip,
             dpi=ana_req.dpi,

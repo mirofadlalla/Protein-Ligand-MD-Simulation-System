@@ -95,7 +95,7 @@ def _platform_properties(platform: mm.Platform) -> dict:
 # Positional restraints (from notebook)
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _apply_restraints(system: mm.System, inpcrd: AmberInpcrdFile, fc: float, top_path: str) -> mm.System:
+def _apply_restraints(system: mm.System, inpcrd: AmberInpcrdFile, crd_path: str, fc: float, top_path: str) -> mm.System:
     """
     Apply positional restraints on all non-hydrogen heavy atoms (protein + ligand)
     using pytraj atom selection.
@@ -104,13 +104,14 @@ def _apply_restraints(system: mm.System, inpcrd: AmberInpcrdFile, fc: float, top
     ----------
     system  : OpenMM System to modify.
     inpcrd  : Loaded AmberInpcrdFile (has positions).
+    crd_path: Path to the .crd coordinate file.
     fc      : Force constant in kJ/mol/nm².
     top_path: Path to the .prmtop file used for pytraj selection.
     """
     if fc <= 0:
         return system
 
-    pt_traj    = pt.iterload(inpcrd.file.name if hasattr(inpcrd, "file") else "", top_path)
+    pt_traj    = pt.iterload(crd_path, top_path)
     pt_top     = pt_traj.top
     # Select all non-hydrogen, non-solvent, non-ion atoms
     sel_mask   = "!(:H*) & !(:WAT) & !(:Na+) & !(:Cl-) & !(:Mg+) & !(:K+)"
@@ -210,7 +211,7 @@ def run_equilibration(
     )
 
     # Positional restraints
-    system = _apply_restraints(system, inpcrd, restraint_fc, top_path)
+    system = _apply_restraints(system, inpcrd, crd_path, restraint_fc, top_path)
 
     system.addForce(mm.MonteCarloBarostat(pres, temp))
 

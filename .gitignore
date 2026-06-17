@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Conda environments
+.conda/
+env/
+venv/
+.venv/
+
+# Simulation data
+data/
+*.dcd
+*.prmtop
+*.crd
+*.inpcrd
+*.rst
+*.mol2
+*.frcmod
+*.lib
+*.in
+*.tmp*
+Results.zip
+Analysis.zip
+*.png
+*.csv
+*.html

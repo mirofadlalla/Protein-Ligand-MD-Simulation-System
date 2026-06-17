@@ -246,6 +246,7 @@ def build_solvated_system(
     )
 
     # ── Second pass: add ions + save final topology ───────────────────────
+    add_salt_str = f"addIonsRand SYS {pos_ion} {num_ion} Cl- {num_ion}\n" if num_ion > 0 else ""
     script_final = (
         f"source {leaprc_ff}\n"
         f"source leaprc.DNA.OL15\n"
@@ -266,7 +267,7 @@ def build_solvated_system(
         f"check SYS\n"
         f"charge SYS\n"
         f"solvatebox SYS {water_box} {box_size} 0.7\n"
-        f"addIonsRand SYS {pos_ion} {num_ion} Cl- {num_ion}\n"
+        f"{add_salt_str}"
         f"saveamberparm SYS {output_top} {output_crd}\n"
         f"savepdb SYS {output_pdb}\n"
         f"quit\n"

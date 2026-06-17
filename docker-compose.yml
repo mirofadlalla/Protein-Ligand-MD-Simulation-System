@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  md-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: md-simulation:latest
+    container_name: md-api
+
+    ports:
+      - "5005:5005"
+
+    # ── Persistent storage ────────────────────────────────────────────────────
+    # All job uploads, intermediate files, and results land in ./data on the host.
+    volumes:
+      - ./data:/app/data
+
+    # ── Environment overrides ─────────────────────────────────────────────────
+    environment:
+      FLASK_HOST:      "0.0.0.0"
+      FLASK_PORT:      "5005"
+      FLASK_DEBUG:     "false"
+      MD_DATA_DIR:     "/app/data"
+      OPENMM_PLATFORM: "AUTO"   # AUTO | CUDA | OpenCL | CPU
+      LOG_LEVEL:       "INFO"
+
+    # ── Resource limits (tweak to your machine) ───────────────────────────────
+    deploy:
+      resources:
+        limits:
+          memory: 16G
+        reservations:
+          memory: 4G
+          # ── GPU passthrough (NVIDIA Container Toolkit required) ────────────
+          # Comment out the 'devices' block if you don't have a GPU.
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+    # ── Restart policy ────────────────────────────────────────────────────────
+    restart: unless-stopped
+
+    # ── Health check ──────────────────────────────────────────────────────────
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+    # ── Logging ───────────────────────────────────────────────────────────────
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+# ── Named volumes (optional — swap with bind mount above) ─────────────────────
+# volumes:
+#   md_data:

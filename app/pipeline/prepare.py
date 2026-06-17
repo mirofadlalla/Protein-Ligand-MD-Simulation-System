@@ -64,8 +64,7 @@ def fix_protein(
     fixer.addMissingHydrogens(7.0)  # pH 7
 
     if remove_heterogens:
-        # keepWater=False removes both heterogens and waters
-        fixer.removeHeterogens(keepWater=False)
+        fixer.removeHeterogens(keepWater=not remove_waters)
     elif remove_waters:
         fixer.removeHeterogens(keepWater=False)
 
