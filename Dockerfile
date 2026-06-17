@@ -1,4 +1,4 @@
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────[...]
 # Dockerfile
 #
 # Base: continuumio/miniconda3 (Debian-based, linux/amd64)
@@ -6,7 +6,7 @@
 #
 # Build:  docker build -t md-simulation .
 # Run:    docker run -p 5005:5005 -v $(pwd)/data:/app/data md-simulation
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────[...]
 
 FROM continuumio/miniconda3:24.1.2-0
 
@@ -14,7 +14,7 @@ FROM continuumio/miniconda3:24.1.2-0
 LABEL maintainer="MD Simulation System"
 LABEL description="Protein-Ligand Molecular Dynamics API (OpenMM + AmberTools)"
 
-# ── System packages ───────────────────────────────────────────────────────────
+# ── System packages ─────────────────────────────────────────────────────────[...]
 # libgomp1: required by AmberTools for OpenMP parallelism
 # procps  : provides ps / free (useful for health checks)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/*
 
-# ── Working directory ─────────────────────────────────────────────────────────
+# ── Working directory ────────────────────────────────────────────────────────[...]
 WORKDIR /app
 
 # ── Copy environment spec first (cache-friendly layer) ───────────────────────
@@ -41,6 +41,7 @@ SHELL ["/bin/bash", "--login", "-c"]
 
 # ── Copy application source ───────────────────────────────────────────────────
 COPY app/     ./app/
+COPY tests/   ./tests/
 COPY run.py   .
 
 # ── Create persistent data directory ─────────────────────────────────────────
@@ -57,12 +58,12 @@ ENV FLASK_HOST=0.0.0.0 \
     PATH=/opt/conda/envs/md_env/bin:$PATH \
     CONDA_DEFAULT_ENV=md_env
 
-# ── Expose API port ───────────────────────────────────────────────────────────
+# ── Expose API port ─────────────────────────────────────────────────────────[...]
 EXPOSE 5005
 
-# ── Health check ─────────────────────────────────────────────────────────────
+# ── Health check ──────────────────────────────────────────────────────────[...]
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:5005/health || exit 1
 
-# ── Entry point ───────────────────────────────────────────────────────────────
+# ── Entry point ──────────────────────────────────────────────────────────[...]
 CMD ["python", "run.py"]
